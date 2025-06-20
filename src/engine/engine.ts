@@ -3,7 +3,6 @@ import { Canvas } from "./canvas";
 import { Graphics } from "./graphics/graphics";
 import { ResourceLoader } from "./resource/loader";
 import { Camera } from "./graphics/camera";
-import { vec3 } from "gl-matrix";
 import { createCanvas } from "./@util/util";
 import { loadAndCreateMesh, loadAndCreateShader, loadAndCreateTexture } from "./resource/loaders";
 
