@@ -5,6 +5,9 @@ import { ResourceLoader } from "./resource/loader";
 import { Camera } from "./graphics/camera";
 import { createCanvas } from "./@util/util";
 import { loadAndCreateMesh, loadAndCreateShader, loadAndCreateTexture } from "./resource/loaders";
+import type RAPIER from "@dimforge/rapier3d";
+import { MathUtils } from "./@util/math";
+import { World } from "./physics/World";
 
 export class Engine {
   private _canvas: Canvas;
@@ -16,7 +19,11 @@ export class Engine {
   private _fpsElement: HTMLElement;
   private _debugElement: HTMLElement;
   private _frameCount: number = 0;
-  private _fpsUpdateTime: number = 0;
+  private _fpsUpdateTime: number = 0;  private _physicsWorld: World;
+
+  // Physics-render synchronization
+  private _rigidBodies: Map<string, { rb: RAPIER.RigidBody, collider: RAPIER.Collider, meshName: string }> = new Map();
+
 
   constructor() {
     const canvasElement = createCanvas();
@@ -34,9 +41,12 @@ export class Engine {
     this._fpsElement = dom.fps;
     this._debugElement = dom.debug;
 
+    this._physicsWorld = new World();
+
     // Initialize engine flags
     this._flags = {
       uncappedFps: false, // Default to capped FPS
+      showPhysicsDebug: true,
       engineModules: []
     };
 
@@ -67,15 +77,24 @@ export class Engine {
     await Promise.all([
       loadAndCreateMesh("meshes/monkey.json", "monkey", this._loader, this._graphics, this._graphics.getShader("uber")),
       loadAndCreateMesh("meshes/monkey.json", "monkeyTexture", this._loader, this._graphics, this._graphics.getShader("uberTexture")),
+      loadAndCreateMesh("meshes/basicmesh.json", "baiscMesh", this._loader, this._graphics, this._graphics.getShader("uber"))
     ])
 
+    const floor = this._graphics.getMesh("baiscMesh");
+    floor.setPosition(0, -1, 5);
+    floor.setRotation(MathUtils.degToRad(90), 0, 0);
+    floor.setScale(10, 10, 10);
 
-    const monkey = this._graphics.getMesh("monkey");
+      const monkey = this._graphics.getMesh("monkey");
     monkey.setPosition(2, 0, 0);
+    const monkeyRb = this._physicsWorld.createRigidBody(monkey, {x: 2, y: 0, z: 0}, {x: 0, y: MathUtils.degToRad(180), z: 0, w: 1});
+    this.registerRigidBody("monkey", monkeyRb, "monkey");
 
     const monkeyTexture = this._graphics.getMesh("monkeyTexture");
     monkeyTexture.setPosition(-2, 0, 0);
-    monkeyTexture.setColorTexture(this._graphics.getTexture("texture"))
+    monkeyTexture.setColorTexture(this._graphics.getTexture("texture"));
+    const monkeyTextureRb = this._physicsWorld.createRigidBody(monkeyTexture, {x: -2, y: 0, z: 0}, {x: 0, y: MathUtils.degToRad(180), z: 0, w: 1});
+    this.registerRigidBody("monkeyTexture", monkeyTextureRb, "monkeyTexture");
 
     this._debugElement.innerHTML = "Done";
 
@@ -101,14 +120,22 @@ export class Engine {
     this._lastFrameTime = currentTime;
 
     // Update FPS counter
-    this.updateFpsCounter(deltaTime);
-
-    this._flags.engineModules.forEach((module) => {
+    this.updateFpsCounter(deltaTime);    this._flags.engineModules.forEach((module) => {
       module.update(deltaTime, this._camera);
     })
     
-    this._graphics.clear();
+    // Step physics simulation with delta time
+    this._physicsWorld.step(deltaTime);
+    
+    // Synchronize physics bodies with render meshes
+    this.syncPhysicsToRender();
+    
+    // Render everything
     this._graphics.render();
+    if( this._flags.showPhysicsDebug) {
+      this._physicsWorld.render(this._graphics.gl, this._graphics.getShader("wireframe"));
+    }
+
 
     // Use uncapped FPS or standard 60fps cap
     if (this._flags.uncappedFps) {
@@ -174,5 +201,89 @@ export class Engine {
     debug.textContent = 'loading...';
     document.body.appendChild(debug);
     return { fps: fpsElement, debug: debug };
+  }
+
+  private syncPhysicsToRender(): void {
+    // Synchronize all registered physics bodies with their corresponding render meshes
+    this._rigidBodies.forEach((rigidBodyData, id) => {
+      const mesh = this._graphics.getMesh(rigidBodyData.meshName);
+      if (!mesh) {
+        console.warn(`Mesh '${rigidBodyData.meshName}' not found for rigid body '${id}'`);
+        return;
+      }
+
+      // Get position and rotation from physics body
+      const translation = rigidBodyData.collider.translation();
+      const rotation = rigidBodyData.rb.rotation();
+
+      // Update mesh position
+      mesh.setPosition(translation.x, translation.y, translation.z);
+
+      // Convert quaternion to Euler angles for mesh rotation
+      const eulerRotation = MathUtils.quatToEuler(rotation);
+      mesh.setRotation(eulerRotation.x, eulerRotation.y, eulerRotation.z);
+    });
+  }
+
+  private registerRigidBody(id: string, rigidBody: { rb: RAPIER.RigidBody, collider: RAPIER.Collider }, meshName: string): void {
+    this._rigidBodies.set(id, { ...rigidBody, meshName });
+  }
+
+  public createPhysicsBodyForMesh(meshName: string, rigidBodyId?: string, position?: {x: number, y: number, z: number}, rotation?: {x: number, y: number, z: number, w: number}): void {
+    const mesh = this._graphics.getMesh(meshName);
+    if (!mesh) {
+      throw new Error(`Mesh '${meshName}' not found`);
+    }
+
+    const id = rigidBodyId || meshName;
+    const rigidBody = this._physicsWorld.createRigidBody(mesh, position, rotation);
+    this.registerRigidBody(id, rigidBody, meshName);
+  }
+
+  public removePhysicsBody(id: string): void {
+    const rigidBodyData = this._rigidBodies.get(id);
+    if (rigidBodyData) {
+      // Remove from physics world
+      this._physicsWorld.removeRigidBody(rigidBodyData.rb);
+      // Remove from our tracking
+      this._rigidBodies.delete(id);
+    }
+  }
+
+  public getPhysicsBodyInfo(id: string): { position: {x: number, y: number, z: number}, rotation: {x: number, y: number, z: number, w: number} } | null {
+    const rigidBodyData = this._rigidBodies.get(id);
+    if (!rigidBodyData) {
+      return null;
+    }
+
+    const translation = rigidBodyData.collider.translation();
+    const rotation = rigidBodyData.rb.rotation();
+
+    return {
+      position: { x: translation.x, y: translation.y, z: translation.z },
+      rotation: { x: rotation.x, y: rotation.y, z: rotation.z, w: rotation.w }
+    };
+  }
+
+  public createPhysicsBodyFromMeshTransform(meshName: string, rigidBodyId?: string): void {
+    const mesh = this._graphics.getMesh(meshName);
+    if (!mesh) {
+      throw new Error(`Mesh '${meshName}' not found`);
+    }
+
+    // Get mesh transform
+    const position = mesh.getPosition();
+    const rotation = mesh.getRotation();
+    
+    // Convert Euler angles to quaternion for physics
+    const quaternion = MathUtils.eulerToQuat(rotation);
+
+    const id = rigidBodyId || meshName;
+    const rigidBody = this._physicsWorld.createRigidBody(
+      mesh, 
+      { x: position[0], y: position[1], z: position[2] }, 
+      quaternion
+    );
+    this.registerRigidBody(id, rigidBody, meshName);
   }
 }

@@ -135,9 +135,32 @@ export class Mesh {
 
     this._gl.bindVertexArray(null);
   }
+  private _position: vec3 = vec3.create();
+  private _rotation: vec3 = vec3.create();
+  private _scale: vec3 = vec3.fromValues(1, 1, 1);
 
   public setPosition(x: number, y: number, z: number): void {
-    mat4.translate(this.matrixes.model, this.matrixes.model, [x, y, z]);
+    vec3.set(this._position, x, y, z);
+    this._updateModelMatrix();
+  }
+
+  public setRotation(x: number, y: number, z: number): void {
+    vec3.set(this._rotation, x, y, z);
+    this._updateModelMatrix();
+  }
+
+  public setScale(x: number, y: number, z: number): void {
+    vec3.set(this._scale, x, y, z);
+    this._updateModelMatrix();
+  }
+
+  private _updateModelMatrix(): void {
+    mat4.identity(this.matrixes.model);
+    mat4.translate(this.matrixes.model, this.matrixes.model, this._position);
+    mat4.rotateX(this.matrixes.model, this.matrixes.model, this._rotation[0]);
+    mat4.rotateY(this.matrixes.model, this.matrixes.model, this._rotation[1]);
+    mat4.rotateZ(this.matrixes.model, this.matrixes.model, this._rotation[2]);
+    mat4.scale(this.matrixes.model, this.matrixes.model, this._scale);
   }
 
   public setColorTexture(texture: Texture): void {
@@ -162,9 +185,25 @@ export class Mesh {
     };
   }
 
+  public get meshData(): MeshData {
+    return this._meshData;
+  }
+
   private static defaultMatrixes(): Internal.MeshMatrixes {
     return {
       model: mat4.identity(mat4.create()),
     };
+  }
+
+  public getPosition(): vec3 {
+    return vec3.clone(this._position);
+  }
+
+  public getRotation(): vec3 {
+    return vec3.clone(this._rotation);
+  }
+
+  public getScale(): vec3 {
+    return vec3.clone(this._scale);
   }
 }
