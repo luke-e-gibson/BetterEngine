@@ -4,10 +4,8 @@ import { Graphics } from "./graphics/graphics";
 import { ResourceLoader } from "./resource/loader";
 import { Camera } from "./graphics/camera";
 import { vec3 } from "gl-matrix";
-import { Texture } from "./resource/Texture";
 import { createCanvas } from "./@util/util";
 import { loadAndCreateMesh, loadAndCreateShader, loadAndCreateTexture } from "./resource/loaders";
-import type { Mesh } from "./graphics/gl/mesh";
 
 export class Engine {
   private _canvas: Canvas;
