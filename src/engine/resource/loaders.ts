@@ -23,5 +23,5 @@ export async function loadAndCreateShader(path: string, name: string, loader: Re
 }
 
 export async function loadAndCreateTexture(path: string, name: string, graphics: Graphics): Promise<Texture> {
-  return graphics.createTexture(path, name);
+  return await graphics.createTexture(path, name);
 }

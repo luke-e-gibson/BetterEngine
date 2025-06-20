@@ -60,7 +60,7 @@ export class Graphics {
     }
     const texture = new Texture(this._gl, image);
     await texture.load(image)
-    return this._textures.set(name || image, texture), texture;
+    return this._textures.set("texture", texture), texture;
   }
 
   public render(): void {
@@ -92,8 +92,9 @@ export class Graphics {
     return this._meshes.get(arg0)?.mesh || null;
   }
 
-  public getTexture(name: string): Texture | null {
-    return this._textures.get(name) || null;
+  public getTexture(name: string): Texture {
+    console.log(this._textures)
+    return this._textures.get(name) as Texture;
   }
 
   public get gl(): WebGL2RenderingContext {

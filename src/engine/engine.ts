@@ -20,6 +20,8 @@ export class Engine {
   private _lastFrameTime: number = 0;
 
   private _fpsElement: HTMLElement;
+  private _debugElement: HTMLElement;
+
   private _frameCount: number = 0;
   private _fpsUpdateTime: number = 0;
 
@@ -35,8 +37,11 @@ export class Engine {
     this._graphics = new Graphics(this._canvas);
     this._graphics.clear();
     this._camera = new Camera(45, this._canvas.canvas.width / this._canvas.canvas.height, 0.1, 100.0);
-    Camera.activeCamera = this._camera;    // Create FPS counter element
-    this._fpsElement = this.createFpsElement();
+    Camera.activeCamera = this._camera;
+
+    const dom = this.createFpsElement();// Create FPS counter element
+    this._fpsElement = dom.fps;
+    this._debugElement = dom.debug;
 
     // Initialize engine flags
     this._flags = {
@@ -69,22 +74,24 @@ export class Engine {
   }
 
   public async initialize(): Promise<void> {
-    this._loader.loadResource<Texture>("texture", new Texture(this._graphics.gl, "textures/monkey.jpg")),
+    this._debugElement.innerHTML = "Loading Shaders";
+    //load Shaders
+    await Promise.all([
+      await loadAndCreateShader("shaders/uber.json", "uber", this._loader, this._graphics),
+      await loadAndCreateShader("shaders/uber.json", "uberTexture", this._loader, this._graphics)
 
-      //load Shaders
-      await Promise.all([
-        await loadAndCreateShader("shaders/uber.json", "uber", this._loader, this._graphics),
-        await loadAndCreateShader("shaders/uber.json", "uberTexture", this._loader, this._graphics)
-
-      ])
+    ])
 
     this._graphics.getShader("uber").setFlags("config", { useLighting: true, smoothShading: false, lightingShader: true, useTextures: false });
     this._graphics.getShader("uberTexture").setFlags("config", { useLighting: true, smoothShading: false, lightingShader: true, useTextures: true });
-    
+
+    this._debugElement.innerHTML = "Loading Textures";
     //Load Textures
     await Promise.all([
       await await loadAndCreateTexture("textures/monkey.jpg", "texture", this._graphics),
     ])
+
+    this._debugElement.innerHTML = "Loading Meshes";
 
     //Load Meshes
     await Promise.all([
@@ -98,10 +105,7 @@ export class Engine {
 
     const monkeyTexture = this._graphics.getMesh("monkeyTexture");
     monkeyTexture.setPosition(-2, 0, 0);
-    let t = new Texture(this._graphics.gl, "textures/monkey.jpg");
-    monkeyTexture.setColorTexture(t)
-    await t.load("textures/monkey.jpg");
-
+    monkeyTexture.setColorTexture(this._graphics.getTexture("texture"))
   }
 
   public start(): void {
@@ -284,7 +288,6 @@ export class Engine {
 
     this.updateFpsCamera(deltaTime);
     this._graphics.clear();
-    this._loader.getResource<Texture>("texture").bind(0);
     this._graphics.render();
 
     // Use uncapped FPS or standard 60fps cap
@@ -318,7 +321,7 @@ export class Engine {
     }
   }
 
-  private createFpsElement(): HTMLElement {
+  private createFpsElement() {
     const fpsElement = document.createElement('div');
     fpsElement.id = 'fps-counter';
     fpsElement.style.position = 'fixed';
@@ -334,6 +337,22 @@ export class Engine {
     fpsElement.style.zIndex = '9999';
     fpsElement.textContent = 'FPS: --';
     document.body.appendChild(fpsElement);
-    return fpsElement;
+
+    const debug = document.createElement('div');
+    debug.id = 'fps-counter';
+    debug.style.position = 'fixed';
+    debug.style.top = '30px';
+    debug.style.left = '10px';
+    debug.style.color = '#00ff00';
+    debug.style.fontFamily = 'monospace';
+    debug.style.fontSize = '16px';
+    debug.style.fontWeight = 'bold';
+    debug.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    debug.style.padding = '5px 10px';
+    debug.style.borderRadius = '5px';
+    debug.style.zIndex = '9999';
+    debug.textContent = 'loading...';
+    document.body.appendChild(debug);
+    return { fps: fpsElement, debug: debug };
   }
 }
