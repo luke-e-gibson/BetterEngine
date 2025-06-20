@@ -1,4 +1,5 @@
 import type { Canvas } from "../canvas";
+import { Texture } from "../resource/Texture";
 import { Grid } from "./grid";
 import { Mesh } from "./mesh";
 import { Shader, shaderSources } from "./shader";
@@ -10,8 +11,9 @@ export class Graphics {
 
   private _shaders: Map<string, Shader> = new Map();
   private _meshes: Map<Internal.Shaders, Internal.MeshWithFlags> = new Map();
+  private _textures: Map<string, Texture> = new Map();
   private _grid: Grid;
- 
+
 
   constructor(context: Canvas) {
     this._gl = context.context;
@@ -52,6 +54,14 @@ export class Graphics {
     return this._createMesh(meshFile, shader, name);
   }
 
+  public async createTexture(image: string, name?: string): Promise<Texture> {
+    if (!this._gl) {
+      throw new Error("WebGL2 context not available");
+    }
+    const texture = new Texture(this._gl, image);
+    await texture.load(image)
+    return this._textures.set(name || image, texture), texture;
+  }
 
   public render(): void {
     this.clear();
@@ -78,8 +88,12 @@ export class Graphics {
     return this._shaders.get(name) as Shader;
   }
 
-  public getMesh(arg0: string) {
+  public getMesh(arg0: string): Mesh {
     return this._meshes.get(arg0)?.mesh || null;
+  }
+
+  public getTexture(name: string): Texture | null {
+    return this._textures.get(name) || null;
   }
 
   public get gl(): WebGL2RenderingContext {

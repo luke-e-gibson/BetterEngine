@@ -6,6 +6,8 @@ import { Camera } from "./camera";
 import { vec3 } from "gl-matrix";
 import { Texture } from "./resource/Texture";
 import { createCanvas } from "./util";
+import { loadAndCreateMesh, loadAndCreateShader, loadAndCreateTexture } from "./resource/loaders";
+import type { Mesh } from "./graphics/mesh";
 
 export class Engine {
   private _canvas: Canvas;
@@ -13,15 +15,15 @@ export class Engine {
   private _loader: ResourceLoader;
   private _camera: Camera;
   private _flags: Internal.EngineFlags;
-  
+
   private _fpsCamera: Internal.FpsCamera;
   private _lastFrameTime: number = 0;
-  
+
   private _fpsElement: HTMLElement;
   private _frameCount: number = 0;
   private _fpsUpdateTime: number = 0;
-  
-  
+
+
 
   constructor() {
     const canvasElement = createCanvas();
@@ -31,7 +33,7 @@ export class Engine {
     this._canvas.fullscreen();
 
     this._graphics = new Graphics(this._canvas);
-    this._graphics.clear(); 
+    this._graphics.clear();
     this._camera = new Camera(45, this._canvas.canvas.width / this._canvas.canvas.height, 0.1, 100.0);
     Camera.activeCamera = this._camera;    // Create FPS counter element
     this._fpsElement = this.createFpsElement();
@@ -69,27 +71,37 @@ export class Engine {
   public async initialize(): Promise<void> {
     this._loader.loadResource<Texture>("texture", new Texture(this._graphics.gl, "textures/monkey.jpg")),
 
+      //load Shaders
+      await Promise.all([
+        await loadAndCreateShader("shaders/uber.json", "uber", this._loader, this._graphics),
+        await loadAndCreateShader("shaders/uber.json", "uberTexture", this._loader, this._graphics)
+
+      ])
+
+    this._graphics.getShader("uber").setFlags("config", { useLighting: true, smoothShading: false, lightingShader: true, useTextures: false });
+    this._graphics.getShader("uberTexture").setFlags("config", { useLighting: true, smoothShading: false, lightingShader: true, useTextures: true });
+    
+    //Load Textures
     await Promise.all([
-      this._loader.loadResourceAsync<ShaderFile>("uber", fetch("shaders/uber.json").then(res => res.json())),
-      this._loader.loadResourceAsync<ShaderFile>("gird", fetch("shaders/grid.json").then(res => res.json())),
+      await await loadAndCreateTexture("textures/monkey.jpg", "texture", this._graphics),
+    ])
 
-      this._loader.loadResourceAsync<MeshFile>("model", fetch("meshes/basicmesh.json").then(res => res.json())),
-      this._loader.loadResourceAsync<MeshFile>("monkey", fetch("meshes/monkey.json").then(res => res.json())),
-      this._loader.loadResourceAsync<MeshFile>("cube", fetch("meshes/cube.json").then(res => res.json())),
-      this._loader.getResource<Texture>("texture").load()
-    ]);
-
-    // Create shaders in parallel
+    //Load Meshes
     await Promise.all([
-      this._graphics.createShader(this._loader.getResource<ShaderFile>("uber"), "uber"),
-      this._graphics.createShader(this._loader.getResource<ShaderFile>("uber"), "uberTexture"),
-    ]);
+      loadAndCreateMesh("meshes/monkey.json", "monkey", this._loader, this._graphics, this._graphics.getShader("uber")),
+      loadAndCreateMesh("meshes/monkey.json", "monkeyTexture", this._loader, this._graphics, this._graphics.getShader("uberTexture")),
+    ])
 
-    const lightingTexture = this._graphics.getShader("uberTexture").setFlags("config", { useLighting: true, smoothShading: false, lightingShader: true, useTextures: true });
 
-    await Promise.all([
-      this._graphics.createMesh(this._loader.getResource<MeshFile>("monkey"), lightingTexture, "monkey"),
-    ]);
+    const monkey = this._graphics.getMesh("monkey");
+    monkey.setPosition(2, 0, 0);
+
+    const monkeyTexture = this._graphics.getMesh("monkeyTexture");
+    monkeyTexture.setPosition(-2, 0, 0);
+    let t = new Texture(this._graphics.gl, "textures/monkey.jpg");
+    monkeyTexture.setColorTexture(t)
+    await t.load("textures/monkey.jpg");
+
   }
 
   public start(): void {
@@ -98,7 +110,7 @@ export class Engine {
 
     // Initialize FPS camera controls
     this.initFpsCamera();
-    
+
     this.update();
   }
 

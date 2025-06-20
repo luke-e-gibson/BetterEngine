@@ -1,6 +1,7 @@
 import { mat4, vec3, vec4 } from "gl-matrix";
 import type { Shader } from "./shader";
 import { Graphics } from "./graphics";
+import type { Texture } from "../resource/Texture";
 
 export class Mesh {
   private _gl: WebGL2RenderingContext;
@@ -11,6 +12,8 @@ export class Mesh {
   private buffers: Internal.MeshBuffers = Mesh.defaultBuffers();
   private matrixes: Internal.MeshMatrixes = Mesh.defaultMatrixes();
   private flags: Internal.MeshFlags = Mesh.defaultFlags();
+
+  private colorTexture: Texture | null = null;
 
   constructor(meshData: MeshData, shader: Shader, gl: WebGL2RenderingContext) {
     this._meshData = meshData
@@ -107,6 +110,10 @@ export class Mesh {
     }
 
     if(shaderFlags.config.useTextures) {
+      if (!this.colorTexture) {
+        throw new Error("Color texture must be set when using textures");
+      }
+      this.colorTexture.bind();
       this._shader.setUniform("uUseTexture", 1);
       this._shader.setUniform("uTexture", 0); // Assuming texture is bound to unit 0
     }
@@ -131,6 +138,10 @@ export class Mesh {
 
   public setPosition(x: number, y: number, z: number): void {
     mat4.translate(this.matrixes.model, this.matrixes.model, [x, y, z]);
+  }
+
+  public setColorTexture(texture: Texture): void {
+    this.colorTexture = texture;
   }
 
   private static defaultFlags(): Internal.MeshFlags {
