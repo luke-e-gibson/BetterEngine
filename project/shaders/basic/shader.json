@@ -1,0 +1,5 @@
+{
+  "name": "Basic",
+  "vertex": "./basic.vert",
+  "fragment": "./basic.frag"
+}

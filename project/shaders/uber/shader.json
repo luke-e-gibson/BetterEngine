@@ -1,0 +1,5 @@
+{
+  "name": "uberShader",
+  "vertex": "./basic.vert",
+  "fragment": "./basic.frag"
+}

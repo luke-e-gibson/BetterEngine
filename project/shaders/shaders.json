@@ -1,0 +1,20 @@
+{
+  "shaders": [
+    {
+      "name": "Basic",
+      "folder": "./basic"
+    },
+    {
+      "name": "Wireframe",
+      "folder": "./wireframe"
+    },
+    {
+      "name": "Uber",
+      "folder": "./uber"
+    },
+    {
+      "name": "Grid",
+      "folder": "./grid"
+    }
+  ]
+}

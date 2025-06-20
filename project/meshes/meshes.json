@@ -1,0 +1,20 @@
+{
+  "meshes": [
+    {
+      "name": "BasicMesh",
+      "file": "./mesh.json"
+    },
+    {
+      "name": "Monkey",
+      "file": "./monkey.json"
+    },
+    {
+      "name": "Cube",
+      "file": "./cube.json"
+    },
+    {
+      "name": "TextureMonkey",
+      "file": "./MonkeyTexture.json"
+    }
+  ] 
+}

@@ -1,0 +1,12 @@
+{
+  "textures": [
+    {
+      "name": "texture1",
+      "file": "./texture.png"
+    },
+    {
+      "name": "Monkey",
+      "file": "./monkey.png"
+    }
+  ]
+}

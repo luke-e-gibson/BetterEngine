@@ -1,0 +1,5 @@
+{
+  "name": "WireFrame",
+  "vertex": "./basic.vert",
+  "fragment": "./basic.frag"
+}
