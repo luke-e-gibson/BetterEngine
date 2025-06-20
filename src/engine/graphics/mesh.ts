@@ -10,7 +10,7 @@ export class Mesh {
 
   private buffers: Internal.MeshBuffers = Mesh.defaultBuffers();
   private matrixes: Internal.MeshMatrixes = Mesh.defaultMatrixes();
-  private flags: Internal.MeshFlags = Mesh.defualtFlags();
+  private flags: Internal.MeshFlags = Mesh.defaultFlags();
 
   constructor(meshData: MeshData, shader: Shader, gl: WebGL2RenderingContext) {
     this._meshData = meshData
@@ -27,7 +27,6 @@ export class Mesh {
 
     this._initializeMatrixes();
     this._initializeMesh();
-
   }
 
   private _initializeMatrixes(): void {
@@ -120,7 +119,6 @@ export class Mesh {
       }
     }
 
-
     if (renderFlags.renderWireframe) {
       Graphics.current.getShader("wireframe").use();
       Graphics.current.getShader("wireframe").setUniform("uModelMatrix", this.matrixes.model);
@@ -135,7 +133,7 @@ export class Mesh {
     mat4.translate(this.matrixes.model, this.matrixes.model, [x, y, z]);
   }
 
-  private static defualtFlags(): Internal.MeshFlags {
+  private static defaultFlags(): Internal.MeshFlags {
     return {
       hasNormals: false,
       hasUvs: false,
