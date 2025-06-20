@@ -42,6 +42,7 @@ namespace Internal {
 
   interface EngineFlags {
     uncappedFps: boolean;
+    engineModules: EngineModule[]
   }
 
   interface FpsCamera {

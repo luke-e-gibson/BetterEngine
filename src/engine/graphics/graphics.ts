@@ -60,7 +60,7 @@ export class Graphics {
     }
     const texture = new Texture(this._gl, image);
     await texture.load(image)
-    return this._textures.set("texture", texture), texture;
+    return this._textures.set(name || "", texture), texture;
   }
 
   public render(): void {
