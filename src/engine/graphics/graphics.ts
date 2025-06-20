@@ -100,6 +100,7 @@ export class Graphics {
 
   private _createBuiltinShaders() {
     this._createShader(shaderSources.wireframe, "wireframe");
+    this._createShader(shaderSources.grid, "gird");
   }
 
   private _createShader(shaderFile: ShaderFile, name?: string, flags: Internal.ShaderFlags = Shader.defaultFlags()): { shader: Shader; name: string } {

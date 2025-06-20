@@ -125,7 +125,6 @@ export class Mesh {
       Graphics.current.getShader("wireframe").use();
       Graphics.current.getShader("wireframe").setUniform("uModelMatrix", this.matrixes.model);
       Graphics.current.getShader("wireframe").setCameraUniforms();
-
       this._gl.drawElements(this._gl.LINE_LOOP, this._meshData.indices!.length, this._gl.UNSIGNED_SHORT, 0)
     }
 

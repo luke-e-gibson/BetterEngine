@@ -4,7 +4,6 @@ import { Graphics } from "./graphics/graphics";
 import { ResourceLoader } from "./resource/loader";
 import { Camera } from "./camera";
 import { vec3 } from "gl-matrix";
-import { Grid } from "./graphics/grid";
 import { Texture } from "./resource/Texture";
 import { createCanvas } from "./util";
 
@@ -13,9 +12,9 @@ export class Engine {
   private _graphics: Graphics;
   private _loader: ResourceLoader;
   private _camera: Camera;
-
-  private _fpsCamera: Internal.FpsCamera;
+  private _flags: Internal.EngineFlags;
   
+  private _fpsCamera: Internal.FpsCamera;
   private _lastFrameTime: number = 0;
   
   private _fpsElement: HTMLElement;
@@ -23,7 +22,6 @@ export class Engine {
   private _fpsUpdateTime: number = 0;
   
   
-  private _flags: Internal.EngineFlags;
 
   constructor() {
     const canvasElement = createCanvas();
@@ -42,6 +40,8 @@ export class Engine {
     this._flags = {
       uncappedFps: false, // Default to capped FPS
     };
+
+    this._graphics.setFlag("renderGrid", true);
 
     // Initialize FPS camera state
     this._fpsCamera = {
@@ -83,7 +83,6 @@ export class Engine {
     await Promise.all([
       this._graphics.createShader(this._loader.getResource<ShaderFile>("uber"), "uber"),
       this._graphics.createShader(this._loader.getResource<ShaderFile>("uber"), "uberTexture"),
-      this._graphics.createShader(this._loader.getResource<ShaderFile>("gird"), "gird")
     ]);
 
     const lightingTexture = this._graphics.getShader("uberTexture").setFlags("config", { useLighting: true, smoothShading: false, lightingShader: true, useTextures: true });
@@ -91,49 +90,15 @@ export class Engine {
     await Promise.all([
       this._graphics.createMesh(this._loader.getResource<MeshFile>("monkey"), lightingTexture, "monkey"),
     ]);
-
-    
-    const lightingShader = this._graphics.getShader("uber");
-    const cubesPerRow = 2;
-    const cubesPerCol = 2;
-    const cubesPerDepth = 2; // Add depth
-    const spacing = 5;
-    const depthSpacing = 5; // Spacing between cubes in depth
-    const offsetX = -((cubesPerRow - 1) * spacing) / 2;
-    const offsetY = -((cubesPerCol - 1) * spacing) / 2;
-    const offsetZ = -5 - ((cubesPerDepth - 1) * depthSpacing) / 2; // Center depth
-
-    for (let i = 0; i < cubesPerRow; i++) {
-      for (let j = 0; j < cubesPerCol; j++) {
-        for (let k = 0; k < cubesPerDepth; k++) {
-          const name = `cube_${i}_${j}_${k}`;
-          const { mesh } = this._graphics.createMesh(
-            this._loader.getResource<MeshFile>("monkey"),
-            lightingShader,
-            name
-          );
-          mesh.setPosition(
-            offsetX + i * spacing,
-            offsetY + j * spacing,
-            offsetZ - k * depthSpacing
-          );
-        }
-      }
-    }
-
   }
 
   public start(): void {
-    let mesh = this._graphics.getMesh("monkey");
-    if (!mesh) throw new Error("Mesh not found");
-    mesh.setPosition(2, 0, -5);
-
     this._graphics.setFlag("renderWireframe", false);
     this._graphics.setFlag("renderMesh", true);
 
     // Initialize FPS camera controls
     this.initFpsCamera();
-
+    
     this.update();
   }
 
@@ -308,7 +273,6 @@ export class Engine {
     this.updateFpsCamera(deltaTime);
     this._graphics.clear();
     this._loader.getResource<Texture>("texture").bind(0);
-    this._grid?.render();
     this._graphics.render();
 
     // Use uncapped FPS or standard 60fps cap
