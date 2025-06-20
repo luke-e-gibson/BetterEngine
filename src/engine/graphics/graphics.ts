@@ -5,7 +5,6 @@ import { Shader, shaderSources } from "./shader";
 export class Graphics {
   public static current: Graphics; 
   private _gl: WebGL2RenderingContext;
-  private _canvas: Canvas;
   
   private _shaders: Map<string, Shader> = new Map();
   private _meshes: Map<Internal.Shaders, Internal.MeshWithFlags> = new Map();
@@ -13,7 +12,6 @@ export class Graphics {
   private _flags: Internal.GraphicsFlags = Graphics.defaultFlags();
 
   constructor(context: Canvas) {
-    this._canvas = context;
     this._gl = context.context;
     if (!this._gl) {
       throw new Error("WebGL2 context not available");

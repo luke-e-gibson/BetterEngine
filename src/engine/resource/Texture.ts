@@ -25,7 +25,7 @@ export class Texture {
         resolve();
       };
       img.onerror = (err) => {
-        reject(new Error(`Failed to load texture: ${image}`));
+        reject(new Error(`Failed to load texture: ${image}. Error: ${err}`));
       };
     });
   }

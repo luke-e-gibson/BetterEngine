@@ -93,9 +93,7 @@ export class Engine {
       this._graphics.createShader(this._loader.getResource<ShaderFile>("gird"), "gird")
     ]);
 
-    const lightColor = this._graphics.getShader("uber").setFlags("config", { useLighting: true, smoothShading: false, lightingShader: true, useTextures: false });
     const lightingTexture = this._graphics.getShader("uberTexture").setFlags("config", { useLighting: true, smoothShading: false, lightingShader: true, useTextures: true });
-
 
     await Promise.all([
       this._graphics.createMesh(this._loader.getResource<MeshFile>("monkey"), lightingTexture, "monkey"),
@@ -306,6 +304,7 @@ export class Engine {
     this._camera.position = [this._fpsCamera.position.x, this._fpsCamera.position.y, this._fpsCamera.position.z] as vec3;
     this._camera.rotation = [this._fpsCamera.rotation.y, this._fpsCamera.rotation.x, 0] as vec3; // [pitch, yaw, roll]
   }
+
   private update(currentTime: number = performance.now()): void {
     // Calculate delta time in seconds
     const deltaTime = this._lastFrameTime === 0 ? 0 : (currentTime - this._lastFrameTime) / 1000;
