@@ -1,5 +1,0 @@
-name = "game-engine"
-compatibility_date = "2025-06-20"
-
-[assets]
-directory = "./dist"

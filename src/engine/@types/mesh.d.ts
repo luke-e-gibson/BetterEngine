@@ -37,6 +37,7 @@ namespace Internal {
   interface GraphicsFlags {
     renderWireframe: boolean;
     renderMesh: boolean;
+    renderGrid: boolean;
   }
 
   interface EngineFlags {

@@ -6,29 +6,23 @@ import { Camera } from "./camera";
 import { vec3 } from "gl-matrix";
 import { Grid } from "./graphics/grid";
 import { Texture } from "./resource/Texture";
-
-function createCanvas(id = "game-canvas"): HTMLCanvasElement {
-  let canvas = document.getElementById(id) as HTMLCanvasElement;
-  if (!canvas) {
-    canvas = document.createElement("canvas");
-    canvas.id = id;
-    document.body.appendChild(canvas);
-  }
-  return canvas;
-}
-
+import { createCanvas } from "./util";
 
 export class Engine {
   private _canvas: Canvas;
   private _graphics: Graphics;
   private _loader: ResourceLoader;
   private _camera: Camera;
+
   private _fpsCamera: Internal.FpsCamera;
+  
   private _lastFrameTime: number = 0;
+  
   private _fpsElement: HTMLElement;
   private _frameCount: number = 0;
   private _fpsUpdateTime: number = 0;
-  private _grid: Grid | null = null;
+  
+  
   private _flags: Internal.EngineFlags;
 
   constructor() {
@@ -73,7 +67,6 @@ export class Engine {
   }
 
   public async initialize(): Promise<void> {
-    await this._graphics.initialize();
     this._loader.loadResource<Texture>("texture", new Texture(this._graphics.gl, "textures/monkey.jpg")),
 
     await Promise.all([
@@ -99,8 +92,7 @@ export class Engine {
       this._graphics.createMesh(this._loader.getResource<MeshFile>("monkey"), lightingTexture, "monkey"),
     ]);
 
-    this._grid = new Grid(this._graphics.getShader("gird"), this._graphics.gl)
-
+    
     const lightingShader = this._graphics.getShader("uber");
     const cubesPerRow = 2;
     const cubesPerCol = 2;
