@@ -1,15 +1,19 @@
 import type { Canvas } from "../canvas";
-import { Mesh } from "./mesh";
-import { Shader, shaderSources } from "./shader";
+import { Texture } from "../resource/Texture";
+import { Grid } from "./gl/grid";
+import { Mesh } from "./gl/mesh";
+import { Shader, shaderSources } from "./gl/shader";
 
 export class Graphics {
-  public static current: Graphics; 
+  public static current: Graphics;
   private _gl: WebGL2RenderingContext;
-  
+  private _flags: Internal.GraphicsFlags = Graphics.defaultFlags();
+
   private _shaders: Map<string, Shader> = new Map();
   private _meshes: Map<Internal.Shaders, Internal.MeshWithFlags> = new Map();
-  
-  private _flags: Internal.GraphicsFlags = Graphics.defaultFlags();
+  private _textures: Map<string, Texture> = new Map();
+  private _grid: Grid;
+
 
   constructor(context: Canvas) {
     this._gl = context.context;
@@ -17,9 +21,9 @@ export class Graphics {
       throw new Error("WebGL2 context not available");
     }
     this._logGpuInfo()
-    this._createBuiltinShader();
+    this._createBuiltinShaders();
     this._gl.clearColor(0, 0, 0, 1);
-    
+
     //Depth test
     this._gl.enable(this._gl.DEPTH_TEST);
     this._gl.depthFunc(this._gl.LESS);
@@ -33,6 +37,68 @@ export class Graphics {
     this._gl.enable(this._gl.SAMPLE_COVERAGE);
     this._gl.sampleCoverage(1.0, false);
 
+    //Grid
+    this._grid = new Grid(this.getShader("gird"), this._gl)
+
+  }
+
+  public clear(): void {
+    this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
+  }
+
+  public createShader(shaderFile: ShaderFile, name?: string, flags: Internal.ShaderFlags = Shader.defaultFlags()): { shader: Shader; name: string } {
+    return this._createShader(shaderFile, name, flags);
+  }
+
+  public createMesh(meshFile: MeshFile, shader: Shader, name?: string): { mesh: Mesh; name: string } {
+    return this._createMesh(meshFile, shader, name);
+  }
+
+  public async createTexture(image: string, name?: string): Promise<Texture> {
+    if (!this._gl) {
+      throw new Error("WebGL2 context not available");
+    }
+    const texture = new Texture(this._gl, image);
+    await texture.load(image)
+    return this._textures.set(name || "", texture), texture;
+  }
+
+  public render(): void {
+    this.clear();
+    if (this._grid && this._flags.renderGrid) {
+      this._grid.render();
+    }
+
+    this._meshes.forEach((mesh) => {
+      if (mesh.flags.isVisible) {
+        mesh.mesh.render(this._flags);
+      }
+    });
+  }
+
+  public setFlag(flag: keyof Internal.GraphicsFlags, value: any): void {
+    if (this._flags.hasOwnProperty(flag)) {
+      this._flags[flag] = value;
+    } else {
+      throw new Error(`Flag ${flag} does not exist in GraphicsFlags`);
+    }
+  }
+
+  public getShader(name: string): Shader {
+    return this._shaders.get(name) as Shader;
+  }
+
+  public getMesh(arg0: string): Mesh {
+    return this._meshes.get(arg0)?.mesh || null;
+  }
+
+  public getTexture(name: string): Texture {
+    console.log(this._textures)
+    return this._textures.get(name) as Texture;
+  }
+
+  public get gl(): WebGL2RenderingContext {
+    return this._gl;
   }
 
   private _logGpuInfo() {
@@ -47,8 +113,9 @@ export class Graphics {
     }
   }
 
-  private _createBuiltinShader() {
+  private _createBuiltinShaders() {
     this._createShader(shaderSources.wireframe, "wireframe");
+    this._createShader(shaderSources.grid, "gird");
   }
 
   private _createShader(shaderFile: ShaderFile, name?: string, flags: Internal.ShaderFlags = Shader.defaultFlags()): { shader: Shader; name: string } {
@@ -73,55 +140,11 @@ export class Graphics {
     return { mesh, name: name || meshFile.name };
   }
 
-  public clear(): void {
-    this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
-  }
-
-  public async initialize(): Promise<void> {
-    
-  }
-
-  public createShader(shaderFile: ShaderFile, name?: string, flags: Internal.ShaderFlags = Shader.defaultFlags()): { shader: Shader; name: string } {
-    return this._createShader(shaderFile, name, flags);
-  }
-
-  public createMesh(meshFile: MeshFile, shader: Shader, name?: string): { mesh: Mesh; name: string } {
-    return this._createMesh(meshFile, shader, name);
-  }
-
-  public getShader(name: string): Shader {
-    return this._shaders.get(name) as Shader;
-  }
-
-  public render(): void {
-    this._meshes.forEach((mesh) => {
-      if(mesh.flags.isVisible) {
-        mesh.mesh.render(this._flags);
-      }
-    });
-  }
-
-  public getMesh(arg0: string) {
-    return this._meshes.get(arg0)?.mesh || null;
-  }
-
-  public setFlag(flag: keyof Internal.GraphicsFlags, value: any): void {
-    if (this._flags.hasOwnProperty(flag)) {
-      this._flags[flag] = value;
-    } else {
-      throw new Error(`Flag ${flag} does not exist in GraphicsFlags`);
-    }
-  }
-
   private static defaultFlags(): Internal.GraphicsFlags {
     return {
       renderWireframe: false,
       renderMesh: true,
+      renderGrid: false,
     };
   }
-
-  public get gl() {
-    return this._gl;
-  }
-
 }

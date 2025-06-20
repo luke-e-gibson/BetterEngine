@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@dimforge/rapier3d':
+        specifier: ^0.17.3
+        version: 0.17.3
       gl-matrix:
         specifier: ^3.4.3
         version: 3.4.3
@@ -32,6 +35,9 @@ importers:
         version: 3.4.1(vite@6.3.5)
 
 packages:
+
+  '@dimforge/rapier3d@0.17.3':
+    resolution: {integrity: sha512-//CVavUmqsIv66M/0zFVZBYsx5vWuOXVAsxEhcjBXlDiNqsX0d0I4/9G2ArHGKXTvGxcYorJ7PbLumlNY0weJQ==}
 
   '@emnapi/runtime@1.4.3':
     resolution: {integrity: sha512-pBPWdu6MLKROBX05wSNKcNb++m5Er+KQ9QkB+WVM+pW2Kx9hoSrVTnu3BdkI5eBLZoKu/J6mW/B6i6bJB2ytXQ==}
@@ -639,6 +645,8 @@ packages:
         optional: true
 
 snapshots:
+
+  '@dimforge/rapier3d@0.17.3': {}
 
   '@emnapi/runtime@1.4.3':
     dependencies:
