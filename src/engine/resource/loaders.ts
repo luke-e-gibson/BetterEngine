@@ -1,6 +1,6 @@
 import type { Graphics } from "../graphics/graphics";
-import { Mesh } from "../graphics/mesh";
-import type { Shader } from "../graphics/shader";
+import { Mesh } from "../graphics/gl/mesh";
+import type { Shader } from "../graphics/gl/shader";
 import type { ResourceLoader } from "./loader";
 import type { Texture } from "./Texture";
 

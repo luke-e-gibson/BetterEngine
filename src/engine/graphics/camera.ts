@@ -1,5 +1,5 @@
 import { mat4, vec3 } from "gl-matrix";
-import { MathUtils } from "./math";
+import { MathUtils } from "../@util/math";
 
 export class Camera {
   private static _activeCamera: Camera | null = null;

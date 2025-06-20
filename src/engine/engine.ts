@@ -2,12 +2,12 @@ import "./main.css";
 import { Canvas } from "./canvas";
 import { Graphics } from "./graphics/graphics";
 import { ResourceLoader } from "./resource/loader";
-import { Camera } from "./camera";
+import { Camera } from "./graphics/camera";
 import { vec3 } from "gl-matrix";
 import { Texture } from "./resource/Texture";
-import { createCanvas } from "./util";
+import { createCanvas } from "./@util/util";
 import { loadAndCreateMesh, loadAndCreateShader, loadAndCreateTexture } from "./resource/loaders";
-import type { Mesh } from "./graphics/mesh";
+import type { Mesh } from "./graphics/gl/mesh";
 
 export class Engine {
   private _canvas: Canvas;
@@ -78,7 +78,8 @@ export class Engine {
     //load Shaders
     await Promise.all([
       await loadAndCreateShader("shaders/uber.json", "uber", this._loader, this._graphics),
-      await loadAndCreateShader("shaders/uber.json", "uberTexture", this._loader, this._graphics)
+      await loadAndCreateShader("shaders/uber.json", "uberTexture", this._loader, this._graphics),
+      
 
     ])
 
@@ -106,6 +107,9 @@ export class Engine {
     const monkeyTexture = this._graphics.getMesh("monkeyTexture");
     monkeyTexture.setPosition(-2, 0, 0);
     monkeyTexture.setColorTexture(this._graphics.getTexture("texture"))
+
+    this._debugElement.innerHTML = "Done";
+
   }
 
   public start(): void {

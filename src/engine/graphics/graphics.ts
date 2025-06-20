@@ -1,8 +1,8 @@
 import type { Canvas } from "../canvas";
 import { Texture } from "../resource/Texture";
-import { Grid } from "./grid";
-import { Mesh } from "./mesh";
-import { Shader, shaderSources } from "./shader";
+import { Grid } from "./gl/grid";
+import { Mesh } from "./gl/mesh";
+import { Shader, shaderSources } from "./gl/shader";
 
 export class Graphics {
   public static current: Graphics;

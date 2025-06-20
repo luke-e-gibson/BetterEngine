@@ -1,7 +1,7 @@
 import { mat4, vec3, vec4 } from "gl-matrix";
 import type { Shader } from "./shader";
-import { Graphics } from "./graphics";
-import type { Texture } from "../resource/Texture";
+import { Graphics } from "../graphics";
+import type { Texture } from "../../resource/Texture";
 
 export class Mesh {
   private _gl: WebGL2RenderingContext;
