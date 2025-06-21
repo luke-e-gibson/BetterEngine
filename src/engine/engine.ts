@@ -132,9 +132,6 @@ export class Engine {
     
     // Render everything
     this._graphics.render();
-    if( this._flags.showPhysicsDebug) {
-      this._physicsWorld.render(this._graphics.gl, this._graphics.getShader("wireframe"));
-    }
 
 
     // Use uncapped FPS or standard 60fps cap
