@@ -1,15 +1,17 @@
 {
-  "include": ["src"],
   "compilerOptions": {
     "module": "esnext",
     "target": "esnext",
     "lib": ["esnext", "DOM"],
     "declaration": true,
+    "declarationDir": "./dist",
     "strict": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "outDir": "dist",
-    "rootDir": "src"
-  }
+    "rootDir": "src",
+    "typeRoots": ["./@types"],
+  },
+  "include": ["src", "@types"],
 }

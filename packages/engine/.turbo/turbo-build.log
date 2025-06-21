@@ -1,6 +1,6 @@
 
 > engine@1.0.0 build C:\BetterEngine\packages\engine
-> tsup
+> tsup --dts-resolve
 
 [34mCLI[39m Building entry: src/engine.ts
 [34mCLI[39m Using tsconfig: tsconfig.json
@@ -8,13 +8,6 @@
 [34mCLI[39m Using tsup config: C:\BetterEngine\packages\engine\tsup.config.ts
 [34mCLI[39m Target: esnext
 [34mCLI[39m Cleaning output folder
-[34mCJS[39m Build start
 [34mESM[39m Build start
-[32mCJS[39m [1mdist\engine.js [22m[32m1.10 KB[39m
-[32mCJS[39m ⚡️ Build success in 121ms
-[32mESM[39m [1mdist\engine.mjs [22m[32m123.00 B[39m
-[32mESM[39m ⚡️ Build success in 123ms
-[34mDTS[39m Build start
-[32mDTS[39m ⚡️ Build success in 870ms
-[32mDTS[39m [1mdist\engine.d.ts  [22m[32m64.00 B[39m
-[32mDTS[39m [1mdist\engine.d.mts [22m[32m64.00 B[39m
+[32mESM[39m [1mdist\engine.js [22m[32m976.00 B[39m
+[32mESM[39m ⚡️ Build success in 31ms
