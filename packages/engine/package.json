@@ -4,9 +4,9 @@
   "description": "",
   "type": "module",
   "scripts": {
-    "build": "tsup --dts-resolve",
+    "build": "tsup",
     "check-types": "tsc --noEmit",
-    "dev": "tsup --watch --dts-resolve"
+    "dev": "tsup --watch"
   },
   "keywords": [],
   "author": "",
