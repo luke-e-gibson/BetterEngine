@@ -1,0 +1,5 @@
+workspaces:
+  - packages/cli
+  - packages/engine
+  - apps/runtime
+  - projects/sandbox
