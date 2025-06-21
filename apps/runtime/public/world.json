@@ -1,0 +1,40 @@
+{
+  "name": "Hello World",
+  "gameObjects": [
+    {
+      "name": "test object",
+      "components": [
+        {
+          "name": "Transform",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "scale": {
+            "x": 1,
+            "y": 1,
+            "z": 1
+          }
+        },
+        {
+          "name": "MeshRenderer",
+          "meshName": "cube",
+          "materialName": "default"
+        }
+      ]
+    }
+  ],
+  "resources": {
+    "cube": {
+      "type": "mesh",
+      "name": "cube",
+      "url": "/meshes/cube.mesh"
+    }
+  }
+}
