@@ -1,5 +1,17 @@
+
 export class Engine {
-  constructor() {
-    console.log("Engine initialized");
+  constructor() {}
+
+  public async initialize(): Promise<void> {
+    
+    
+  }
+
+  public start(): void {
+
+  }
+
+  private update(): void {
+
   }
 }
