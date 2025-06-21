@@ -46,7 +46,6 @@ export class Engine {
     // Initialize engine flags
     this._flags = {
       uncappedFps: false, // Default to capped FPS
-      showPhysicsDebug: true,
       engineModules: []
     };
 
