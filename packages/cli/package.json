@@ -1,8 +1,8 @@
 {
-  "name": "engine",
+  "name": "cli",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
+  "bin": "./bin/index.js",
   "scripts": {
     "build": "tsup",
     "check-types": "tsc --noEmit",
@@ -15,11 +15,5 @@
   "devDependencies": {
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"
-  },
-  "exports": {
-    ".": {
-      "types": "./dist/engine.d.mts",
-      "default": "./dist/engine.mjs"
-    }
   }
 }
